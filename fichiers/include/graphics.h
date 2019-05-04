@@ -26,24 +26,12 @@ static inline Uint32 *img_cell (Uint32 *i, int l, int c)
   return i + l * DIM + c;
 }
 
-uint8_t bits[512];
+uint8_t* img_bit_array;
 #define cur_img(y, x) (*img_cell (image, (y), (x)))
 #define next_img(y, x) (*img_cell (alt_image, (y), (x)))
 
-static uint8_t cur_bit(){
-  printf("cur_bit DEBUG\n");
-  int index = 0;
-  for (int x=0; x<DIM;x++)
-    for (int y =0; y<DIM; y++)
-      if (x > 0 && x < DIM - 1 && y > 0 && y < DIM - 1){
-        for (int i = y - 1; i <= y + 1; i++)
-          for (int j = x - 1; j <= x + 1; j++){
-            bits[index/(8*(i+1))] |= ((cur_img (i, j) != 0) << (index%8)); //set the nth bit to 1 if it's a living neighbour
-            index++;
-          }
-        index = 0;
-      }
-  return 1;
+static inline uint8_t cur_bit(int x, int y){
+  return img_bit_array[(DIM*y+x)];
 }
 
 static inline void swap_images (void)

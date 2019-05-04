@@ -48,32 +48,12 @@ static int compute_new_state_opt (int y, int x)
   unsigned n      = 0;
   unsigned change = 0;
 
-  uint8_t bits[1] ;// 1*8 set a neighbour 32 bits array
-  int index = 0;
-  bool value;
-
   if (x > 0 && x < DIM - 1 && y > 0 && y < DIM - 1) {
     for (int i = y - 1; i <= y + 1; i++)
       for (int j = x - 1; j <= x + 1; j++)
-        if (i != y || j != x){
-          printf("%u",cur_img (i, j));
-          bits[index/8] |= ((cur_img (i, j) != 0) << (index%8)); //set the nth bit to 1 if it's a living neighbour
-          index++;
-          n += (cur_img (i, j) != 0);
-        }
-    printf("\n");
-    //////////
-    int value = 0;
-    int n = 0;
-    int j = 0;
-    for (int i=0; i<8; i++){
-      n +=  value = (bits[(8*j)+i/8*(j+1)] & (1 << (i%8))) != 0;
-        printf("%d",value);
-        }
-        printf(" n = %d \n", n);
-        j++;
-    
-    //////////////
+        if (i != y || j != x)
+          n += (cur_bit (i, j) != 0);
+
     if (cur_img (y, x) != 0) {
       if (n == 2 || n == 3)
         n = 0xFFFF00FF;
@@ -110,6 +90,7 @@ static int traiter_tuile (int i_d, int j_d, int i_f, int j_f)
 
 static int traiter_tuile_opt (int i_d, int j_d, int i_f, int j_f)
 {
+  //printf("traiter_tuile_opt DEBUG\n");
   unsigned change = 0;
 
   PRINT_DEBUG ('c', "tuile [%d-%d][%d-%d] traitée\n", i_d, i_f, j_d, j_f);
@@ -162,9 +143,20 @@ unsigned vie_compute_tiled (unsigned nb_iter)
 
 unsigned vie_compute_opt (unsigned nb_iter)
 {
+  printf("opt DEBUG\n");
+  img_bit_array = (uint8_t *) malloc(DIM*DIM * sizeof(uint8_t));
+
+  printf("img_to_bytes DEBUG\n");
+  for(int x=0; x<DIM; x++)
+    for(int y=0; y<DIM; y++)
+      if (x > 0 && x < DIM - 1 && y > 0 && y < DIM - 1)
+        for (int i=0; i<8; i++){
+         // printf("for (%d,%d) (img_to_bytes) DEBUG\n",x,y);
+          img_bit_array[(DIM*y+x)+i/8] |= ((cur_img (x, y) != 0) << (i%8)); //set the nth bit to 1 if it's a living neighbour
+          }
+
   static unsigned tranche = 0;
   tranche = DIM / GRAIN;
-  cur_bit();
 
   for (unsigned it = 1; it <= nb_iter; it++) {
 
